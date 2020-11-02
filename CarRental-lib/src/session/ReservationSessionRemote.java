@@ -9,3 +9,6 @@ public interface ReservationSessionRemote {
     Set<String> getAllRentalCompanies();
     
 }
+
+
+
