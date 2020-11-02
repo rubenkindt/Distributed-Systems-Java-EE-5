@@ -3,11 +3,17 @@ package rental;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +39,47 @@ public class RentalStore {
         return rentals;
     }
 
+    public static Set<CarType> getAvailableCarTypes(Date start,Date end){
+        Set<CarType> ctList=new HashSet<CarType>();
+        
+        for (Iterator<Map.Entry<String, CarRentalCompany>> entries = rentals.entrySet().iterator(); entries.hasNext(); ) {
+            Map.Entry<String, CarRentalCompany> compMap= entries.next();
+            ctList.addAll(compMap.getValue().getAvailableCarTypes(start, end));
+        }
+        return ctList;
+    }
+
+    public static Quote createQuote(ReservationConstraints constr) throws ReservationException{
+        Set<CarType> ctList=new HashSet<CarType>();
+        Quote quote=null;
+        for (Iterator<Map.Entry<String, CarRentalCompany>> entries = rentals.entrySet().iterator(); entries.hasNext(); ) {
+            Map.Entry<String, CarRentalCompany> compMap= entries.next();
+            quote=compMap.getValue().createQuote(constr, "");
+        }
+        return quote;
+    }   
+    
+    public static List<Reservation> confirmQuotes(List<Quote> quoteList) throws ReservationException {
+        List<Reservation> reservationList=new ArrayList<Reservation>();
+		
+        boolean succes=true;
+        for (int quote=0;quote<quoteList.size();quote++) {
+
+            String compName=quoteList.get(quote).getRentalCompany();
+            for (Iterator<Map.Entry<String, CarRentalCompany>> entries = rentals.entrySet().iterator(); entries.hasNext(); ) {
+                Map.Entry<String, CarRentalCompany> compMap= entries.next();
+                CarRentalCompany compa= compMap.getValue();
+                if (compa.getName().equals(compName)){
+                    
+                    reservationList.add(compa.confirmQuote(quoteList.get(quote)));
+                    break;
+                    
+                }
+            }
+        }
+        return reservationList; 
+    }
+    
     public static void loadRental(String datafile) {
         try {
             CrcData data = loadData(datafile);
