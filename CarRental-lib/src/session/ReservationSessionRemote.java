@@ -17,7 +17,7 @@ public interface ReservationSessionRemote {
     String getName();
     Set<String> getAllRentalCompanies();
     Set<CarType> getAvailableCarTypes(Date start, Date end);
-    void createQuote(ReservationConstraints constr)throws ReservationException;
+    void createQuote(String name, Date start, Date end, String carType, String region)throws ReservationException;
     List<Quote> getCurrentQuotes();
     List<Reservation> confirmQuotes()throws ReservationException;
     

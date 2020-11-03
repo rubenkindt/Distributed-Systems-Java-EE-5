@@ -75,7 +75,21 @@ public class CarRentalCompany {
 		}
 		return availableCarTypes;
 	}
-	
+	public int getNumberOfReservationsForCarType(String carType) {
+		
+            int nrofRes=0;
+
+            for (int car =0;car<cars.size();car++) {
+
+                if (cars.get(car).getType().getName().equals(carType)) {
+
+                    nrofRes += cars.get(car).getAllReservations().size();
+                }
+            }
+            return nrofRes;
+	}
+        
+        
         /***********
          * Regions *
          **********/

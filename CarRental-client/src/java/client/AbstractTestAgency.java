@@ -204,7 +204,7 @@ public abstract class AbstractTestAgency<ReservationSession, ManagerSession> ext
             String[] pair = pars.split(":");
             int nr = getNumberOfReservationsForCarType(rental, name, pair[0]);
             if (Integer.parseInt(pair[1]) == nr) {
-                System.out.println(name + " has correct totals " + pars + " " + nr);
+                System.out.println(name + " has correct totals " + pars + " " + nr );
             } else {
                 System.err.println(name + " has wrong totals " + pars + " " + nr);
             }

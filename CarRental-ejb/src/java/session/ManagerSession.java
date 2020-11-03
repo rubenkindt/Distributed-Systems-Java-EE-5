@@ -5,8 +5,10 @@
  */
 package session;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.security.DeclareRoles;
@@ -26,30 +28,29 @@ import rental.Reservation;
 public class ManagerSession implements ManagerSessionRemote {
     private String name; 
   
-    @RolesAllowed("Manager")
+    //@RolesAllowed("Manager")
     @Override
     public int getNrOfReservationsByCarTypeInCompany(String companyName, String carType) throws Exception{
         int i=0;
+        System.out.println("company: "+companyName+ " carType: "+carType);
         for (Iterator<Map.Entry<String, CarRentalCompany>> entries = RentalStore.getRentals().entrySet().iterator(); entries.hasNext(); ) {
             Map.Entry<String, CarRentalCompany> compMap= entries.next();
             CarRentalCompany compa= compMap.getValue();
+            
             if (compa.getName().equals(companyName)){
-                for (Iterator<CarType> resInter = compa.getCarTypes().iterator(); resInter.hasNext(); ){
-                    if(resInter.next().getName().equals(carType)){
-                        i++;
-                    }
-                }
-                if (i==0){
-                    throw new Exception("RentalStore (getNrOfReservationsByCarTypeInCompany): Wrong cartype");
-                }else
-                    return i;
+                
+                i=compa.getNumberOfReservationsForCarType(carType);
+                
             }
         }
-        throw new Exception("RentalStore (getNrOfReservationsByCarTypeInCompany): Wrong company");
-
+        if (i==0){
+            throw new Exception("RentalStore (getNrOfReservationsByCarTypeInCompany): Wrong cartype");
+        }else{
+            return i;
+        }
     }
     
-    @RolesAllowed("Manager")
+    //@RolesAllowed("Manager")
     @Override
     public int getNrOfReservationsByClient(String clientName) {
         Set<Reservation> res=new HashSet<Reservation>();

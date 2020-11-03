@@ -53,8 +53,9 @@ public class ReservationSession implements ReservationSessionRemote {
         return ctList;
     }
     @Override
-    public void createQuote(ReservationConstraints constr)throws ReservationException{
-        Set<CarType> ctList=new HashSet<CarType>();
+    public void createQuote(String name, Date start, Date end, String carType, String region)throws ReservationException{
+        ReservationConstraints constr=new ReservationConstraints(start,end, carType,region);
+        
         Quote quote=null;
         for (Iterator<Map.Entry<String, CarRentalCompany>> entries = RentalStore.getRentals().entrySet().iterator(); entries.hasNext(); ) {
             Map.Entry<String, CarRentalCompany> compMap= entries.next();
@@ -99,6 +100,10 @@ public class ReservationSession implements ReservationSessionRemote {
             }
         }
         if (succes==false) {
+            System.out.println("Reservation canceled: ");
+            System.out.println("Reservation canceled: "+this.name);
+            
+            System.out.println(reservationList.toString());
             CarRentalCompany compa=null;
             for (int i=0;i<reservationList.size();i++) {
                 String compaName=reservationList.get(i).getRentalCompany();

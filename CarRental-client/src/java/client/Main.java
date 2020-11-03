@@ -63,19 +63,15 @@ public class Main extends AbstractTestAgency<ReservationSessionRemote, ManagerSe
 
     @Override
     protected void getAvailableCarTypes(ReservationSessionRemote session, Date start, Date end) throws Exception {
-        InitialContext context = new InitialContext();
-        //ReservationSessionRemote session2 = (ReservationSessionRemote) context.lookup((ReservationSessionRemote) session);
         
-        String str=session.getName();
         session.getAvailableCarTypes(start, end);
     }
 
     @Override
     protected void createQuote(ReservationSessionRemote session, String name, Date start, Date end, String carType, String region) throws Exception {
         if (session.getName().equals(name)){
-            ReservationConstraints constr=new ReservationConstraints(start,end, carType,region);
-            String str =session.getName();
-            session.createQuote(constr);
+            
+            session.createQuote(  name,  start,  end,  carType,  region);
         }
         else{
             throw new Exception("Name does not match: "+session.getName()+" Vs: "+name);
