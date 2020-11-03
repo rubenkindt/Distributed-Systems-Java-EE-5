@@ -15,7 +15,9 @@ import rental.CarType;
  */
 @Remote
 public interface ManagerSessionRemote {
-    int getNrOfReservationsByCarTypeInCompany(String CompanyName, CarType cartype);
-    int getNrOfReservationsByClient(String clientName);
+    
+    void setName(String Name);
+    int getNrOfReservationsByCarTypeInCompany(String CompanyName, String cartype)throws Exception;
+    int getNrOfReservationsByClient(String clientName)throws Exception;
     
 }

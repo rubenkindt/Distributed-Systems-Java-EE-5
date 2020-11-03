@@ -38,47 +38,6 @@ public class RentalStore {
         }
         return rentals;
     }
-
-    public static Set<CarType> getAvailableCarTypes(Date start,Date end){
-        Set<CarType> ctList=new HashSet<CarType>();
-        
-        for (Iterator<Map.Entry<String, CarRentalCompany>> entries = rentals.entrySet().iterator(); entries.hasNext(); ) {
-            Map.Entry<String, CarRentalCompany> compMap= entries.next();
-            ctList.addAll(compMap.getValue().getAvailableCarTypes(start, end));
-        }
-        return ctList;
-    }
-
-    public static Quote createQuote(ReservationConstraints constr) throws ReservationException{
-        Set<CarType> ctList=new HashSet<CarType>();
-        Quote quote=null;
-        for (Iterator<Map.Entry<String, CarRentalCompany>> entries = rentals.entrySet().iterator(); entries.hasNext(); ) {
-            Map.Entry<String, CarRentalCompany> compMap= entries.next();
-            quote=compMap.getValue().createQuote(constr, "");
-        }
-        return quote;
-    }   
-    
-    public static List<Reservation> confirmQuotes(List<Quote> quoteList) throws ReservationException {
-        List<Reservation> reservationList=new ArrayList<Reservation>();
-		
-        boolean succes=true;
-        for (int quote=0;quote<quoteList.size();quote++) {
-
-            String compName=quoteList.get(quote).getRentalCompany();
-            for (Iterator<Map.Entry<String, CarRentalCompany>> entries = rentals.entrySet().iterator(); entries.hasNext(); ) {
-                Map.Entry<String, CarRentalCompany> compMap= entries.next();
-                CarRentalCompany compa= compMap.getValue();
-                if (compa.getName().equals(compName)){
-                    
-                    reservationList.add(compa.confirmQuote(quoteList.get(quote)));
-                    break;
-                    
-                }
-            }
-        }
-        return reservationList; 
-    }
     
     public static void loadRental(String datafile) {
         try {

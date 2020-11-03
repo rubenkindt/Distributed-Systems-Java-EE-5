@@ -5,70 +5,102 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.naming.InitialContext;
+import javax.naming.Name;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import rental.Reservation;
+import rental.ReservationConstraints;
 import session.ReservationSessionRemote;
 import session.ManagerSessionRemote;
 
 @Remote
-public class Main extends AbstractTestAgency<ReservationSessionRemote, ManagerSessionRemote>{
+public class Main extends AbstractTestAgency<ReservationSessionRemote, ManagerSessionRemote> {
     //session 5 @PersistenceContext
     //session 5 private EntityManager em;
-        
+    
+    
     @EJB
-    static ReservationSessionRemote session;
+    static ReservationSessionRemote resSession;
     //ReservationSessionRemote session = (ReservationSessionRemote)InitialContext.lookup("java:global/CarRental/ReservationSessionRemote");
     
-    @EJB
-    static ManagerSessionRemote msession;
+    //@EJB
+    //static ManagerSessionRemote msession;
     
-    
+     public Main(String scriptFile) {
+        super(scriptFile);
+    }
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        System.out.println("found rental companies: "+session.getAllRentalCompanies());
+    public static void main(String[] args) throws Exception {
+        new Main("simpleTrips").run();
+        //System.out.println("found rental companies: "+resSession.getAllRentalCompanies());
     }
 
-    public Main(String scriptFile) {
-        super(scriptFile);
-    }
+   
 
     @Override
     protected ReservationSessionRemote getNewReservationSession(String name) throws Exception {
-        return session.ReservationSession(name);
+        InitialContext context = new InitialContext();
+        //throws NamingExeption
         
+        ReservationSessionRemote session2 = (ReservationSessionRemote)context.lookup(ReservationSessionRemote.class.getName());    
+        session2.setName(name);
+        //String str =session2.getName();
+        return session2; 
     }
 
     @Override
     protected ManagerSessionRemote getNewManagerSession(String name) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        InitialContext context = new InitialContext();
+        //throws NamingExeption
+        
+        ManagerSessionRemote session2 = (ManagerSessionRemote)context.lookup(ManagerSessionRemote.class.getName());    
+        session2.setName(name);
+        
+        return session2; 
     }
 
     @Override
     protected void getAvailableCarTypes(ReservationSessionRemote session, Date start, Date end) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        InitialContext context = new InitialContext();
+        //ReservationSessionRemote session2 = (ReservationSessionRemote) context.lookup((ReservationSessionRemote) session);
+        
+        String str=session.getName();
+        session.getAvailableCarTypes(start, end);
     }
 
     @Override
     protected void createQuote(ReservationSessionRemote session, String name, Date start, Date end, String carType, String region) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (session.getName().equals(name)){
+            ReservationConstraints constr=new ReservationConstraints(start,end, carType,region);
+            String str =session.getName();
+            session.createQuote(constr);
+        }
+        else{
+            throw new Exception("Name does not match: "+session.getName()+" Vs: "+name);
+        }
     }
 
     @Override
     protected List<Reservation> confirmQuotes(ReservationSessionRemote session, String name) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (session.getName().equals(name)){
+            return session.confirmQuotes();
+        }
+        else{
+            throw new Exception("Name does not match: "+session.getName()+" Vs: "+name);
+        }
     }
 
     @Override
     protected int getNumberOfReservationsBy(ManagerSessionRemote ms, String clientName) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return ms.getNrOfReservationsByClient(clientName);
     }
 
     @Override
     protected int getNumberOfReservationsForCarType(ManagerSessionRemote ms, String carRentalName, String carType) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        return ms.getNrOfReservationsByCarTypeInCompany(carRentalName, carType);
     }
 
 }

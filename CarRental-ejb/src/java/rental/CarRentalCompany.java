@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 public class CarRentalCompany {
 
-	private static Logger logger = Logger.getLogger(CarRentalCompany.class.getName());
+    private static Logger logger = Logger.getLogger(CarRentalCompany.class.getName());
 	
     private List<String> regions;
 	private String name;
