@@ -25,10 +25,11 @@ import rental.Reservation;
  */
 @DeclareRoles("Manager")
 @Stateless
+@RolesAllowed("Manager")
 public class ManagerSession implements ManagerSessionRemote {
     private String name; 
   
-    //@RolesAllowed("Manager")
+    
     @Override
     public int getNrOfReservationsByCarTypeInCompany(String companyName, String carType) throws Exception{
         int i=0;
