@@ -1,0 +1,3 @@
+reinstall server
+	install user/ manager NOT in deafult
+	remember so select the checkbox in the security
