@@ -1,65 +1,71 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package session;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
-import rental.Car2;
-import rental.CarRentalCompany2;
-import rental.CarType2;
+import rental.CarRentalCompany;
+import rental.CarType;
 import rental.RentalStore;
-import rental.Reservation2;
+import rental.Reservation;
 
+/**
+ *
+ * @author Ruben Kindt R0656495
+ */
+@DeclareRoles("Manager")
 @Stateless
 public class ManagerSession implements ManagerSessionRemote {
+    private String name; 
+  
+    //@RolesAllowed("Manager")
+    @Override
+    public int getNrOfReservationsByCarTypeInCompany(String companyName, String carType) throws Exception{
+        int i=0;
+        System.out.println("company: "+companyName+ " carType: "+carType);
+        for (Iterator<Map.Entry<String, CarRentalCompany>> entries = RentalStore.getRentals().entrySet().iterator(); entries.hasNext(); ) {
+            Map.Entry<String, CarRentalCompany> compMap= entries.next();
+            CarRentalCompany compa= compMap.getValue();
+            
+            if (compa.getName().equals(companyName)){
+                
+                i=compa.getNumberOfReservationsForCarType(carType);
+                
+            }
+        }
+        if (i==0){
+            throw new Exception("RentalStore (getNrOfReservationsByCarTypeInCompany): Wrong cartype");
+        }else{
+            return i;
+        }
+    }
     
+    //@RolesAllowed("Manager")
     @Override
-    public Set<CarType2> getCarTypes(String company) {
-        try {
-            return new HashSet<CarType2>(RentalStore.getRental(company).getAllTypes());
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
+    public int getNrOfReservationsByClient(String clientName) {
+        Set<Reservation> res=new HashSet<Reservation>();
+        for (Iterator<Map.Entry<String, CarRentalCompany>> entries = RentalStore.getRentals().entrySet().iterator(); entries.hasNext(); ) {
+            Map.Entry<String, CarRentalCompany> compMap= entries.next();
+            CarRentalCompany compa= compMap.getValue();
+            
+            res.addAll(compa.getReservationsBy(clientName));
         }
+        return res.size();
     }
 
     @Override
-    public Set<Integer> getCarIds(String company, String type) {
-        Set<Integer> out = new HashSet<Integer>();
-        try {
-            for(Car2 c: RentalStore.getRental(company).getCars(type)){
-                out.add(c.getId());
-            }
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
-        return out;
+    public void setName(String Name) {
+        this.name=name;
     }
-
-    @Override
-    public int getNumberOfReservations(String company, String type, int id) {
-        try {
-            return RentalStore.getRental(company).getCar(id).getReservations().size();
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
-            return 0;
-        }
-    }
-
-    @Override
-    public int getNumberOfReservations(String company, String type) {
-        Set<Reservation2> out = new HashSet<Reservation2>();
-        try {
-            for(Car2 c: RentalStore.getRental(company).getCars(type)){
-                out.addAll(c.getReservations());
-            }
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
-            return 0;
-        }
-        return out.size();
-    }
-
+    
 }

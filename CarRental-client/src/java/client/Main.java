@@ -2,36 +2,50 @@ package client;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
+import javax.ejb.EJB;
+import javax.ejb.Remote;
 import javax.naming.InitialContext;
-import rental.CarType2;
-import rental.Reservation2;
+import javax.naming.Name;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import rental.Reservation;
 import rental.ReservationConstraints;
-import session.ManagerSessionRemote;
 import session.ReservationSessionRemote;
+import session.ManagerSessionRemote;
 
-public class Main extends AbstractTestManagement<ReservationSessionRemote, ManagerSessionRemote> {
-
-    public Main(String scriptFile) {
+@Remote
+public class Main extends AbstractTestAgency<ReservationSessionRemote, ManagerSessionRemote> {
+    //session 5 @PersistenceContext
+    //session 5 private EntityManager em;
+    
+    
+    @EJB
+    static ReservationSessionRemote resSession;
+    //ReservationSessionRemote session = (ReservationSessionRemote)InitialContext.lookup("java:global/CarRental/ReservationSessionRemote");
+    
+    //@EJB
+    //static ManagerSessionRemote msession;
+    
+     public Main(String scriptFile) {
         super(scriptFile);
     }
-
+    /**
+     * @param args the command line arguments
+     */
     public static void main(String[] args) throws Exception {
-        // TODO: use updated manager interface to load cars into companies
-        
-        
-        new Main("trips").run();
+        new Main("simpleTrips").run();
+        //System.out.println("found rental companies: "+resSession.getAllRentalCompanies());
     }
 
-    
-    
+   
+
     @Override
     protected ReservationSessionRemote getNewReservationSession(String name) throws Exception {
         InitialContext context = new InitialContext();
         //throws NamingExeption
         
         ReservationSessionRemote session2 = (ReservationSessionRemote)context.lookup(ReservationSessionRemote.class.getName());    
-        session2.setRenterName(name);
+        session2.setName(name);
         //String str =session2.getName();
         return session2; 
     }
@@ -39,8 +53,10 @@ public class Main extends AbstractTestManagement<ReservationSessionRemote, Manag
     @Override
     protected ManagerSessionRemote getNewManagerSession(String name) throws Exception {
         InitialContext context = new InitialContext();
+        //throws NamingExeption
         
         ManagerSessionRemote session2 = (ManagerSessionRemote)context.lookup(ManagerSessionRemote.class.getName());    
+        session2.setName(name);
         
         return session2; 
     }
@@ -53,12 +69,12 @@ public class Main extends AbstractTestManagement<ReservationSessionRemote, Manag
 
     @Override
     protected void createQuote(ReservationSessionRemote session, String name, Date start, Date end, String carType, String region) throws Exception {
-        if (session.getRenterName().equals(name)){
+        if (session.getName().equals(name)){
             
             session.createQuote(  name,  start,  end,  carType,  region);
         }
         else{
-            throw new Exception("Name does not match: "+session.getRenterName()+" Vs: "+name);
+            throw new Exception("Name does not match: "+session.getName()+" Vs: "+name);
         }
     }
 
@@ -82,57 +98,5 @@ public class Main extends AbstractTestManagement<ReservationSessionRemote, Manag
         
         return ms.getNrOfReservationsByCarTypeInCompany(carRentalName, carType);
     }
-    
-    
-    
-    
-    @Override
-    protected Set<String> getBestClients(ManagerSessionRemote ms) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
-    @Override
-    protected String getCheapestCarType(ReservationSessionRemote session, Date start, Date end, String region) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    protected CarType2 getMostPopularCarTypeIn(ManagerSessionRemote ms, String carRentalCompanyName, int year) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    protected ReservationSessionRemote getNewReservationSession(String name) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    protected ManagerSessionRemote getNewManagerSession(String name) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    protected void getAvailableCarTypes(ReservationSessionRemote session, Date start, Date end) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    protected void createQuote(ReservationSessionRemote session, String name, Date start, Date end, String carType, String region) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    protected List<Reservation2> confirmQuotes(ReservationSessionRemote session, String name) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    protected int getNumberOfReservationsBy(ManagerSessionRemote ms, String clientName) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    protected int getNumberOfReservationsByCarType(ManagerSessionRemote ms, String carRentalName, String carType) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

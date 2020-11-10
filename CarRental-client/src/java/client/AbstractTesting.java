@@ -10,9 +10,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.HashSet;
-import java.util.Set;
-
 
 /**
  * Small scriptable testing system. Reads a scenario from file and executes it.
@@ -139,8 +136,8 @@ public abstract class AbstractTesting {
         return out.toString();
     }
 
-	protected final static Set<String> tokenizeRegions(String regions) {
-		Set<String> result = new HashSet<String>();
+	protected final static List<String> tokenizeRegions(String regions) {
+		List<String> result = new LinkedList<String>();
 		StringTokenizer stz = new StringTokenizer(regions, ":");
 		while (stz.hasMoreTokens()){
 			result.add(stz.nextToken());
