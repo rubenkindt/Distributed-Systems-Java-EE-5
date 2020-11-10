@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import rental.Reservation;
+import rental.Reservation2;
 
 /**
  * 
@@ -92,7 +92,7 @@ public abstract class AbstractTestAgency<ReservationSession, ManagerSession> ext
      *
      * @throws Exception if things go wrong, throw exception
      */
-    protected abstract List<Reservation> confirmQuotes(ReservationSession session, String name) throws Exception;
+    protected abstract List<Reservation2> confirmQuotes(ReservationSession session, String name) throws Exception;
 
     /**
      * Get the number of reservations made by the given renter (across all 
@@ -118,7 +118,7 @@ public abstract class AbstractTestAgency<ReservationSession, ManagerSession> ext
      *
      * @throws Exception if things go wrong, throw exception
      */
-    protected abstract int getNumberOfReservationsForCarType(ManagerSession ms, String carRentalName, String carType) throws Exception;    
+    protected abstract int getNumberOfReservationsByCarType(ManagerSession ms, String carRentalName, String carType) throws Exception;    
 
     public AbstractTestAgency(String scriptFile) {
         super(scriptFile);
@@ -202,9 +202,9 @@ public abstract class AbstractTestAgency<ReservationSession, ManagerSession> ext
         while (scriptReader.hasMoreTokens()) {
             String pars = scriptReader.nextToken();
             String[] pair = pars.split(":");
-            int nr = getNumberOfReservationsForCarType(rental, name, pair[0]);
+            int nr = getNumberOfReservationsByCarType(rental, name, pair[0]);
             if (Integer.parseInt(pair[1]) == nr) {
-                System.out.println(name + " has correct totals " + pars + " " + nr );
+                System.out.println(name + " has correct totals " + pars + " " + nr);
             } else {
                 System.err.println(name + " has wrong totals " + pars + " " + nr);
             }

@@ -1,137 +1,82 @@
 package session;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.Stateful;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import rental.CarRentalCompany;
-import rental.CarType;
+import rental.CarType2;
 import rental.Quote;
 import rental.RentalStore;
-import rental.Reservation;
+import rental.Reservation2;
 import rental.ReservationConstraints;
 import rental.ReservationException;
 
 @Stateful
 public class ReservationSession implements ReservationSessionRemote {
 
-    private String name;
-    private List<Quote> quoteList=new ArrayList<Quote>();
-    private List<Reservation> resList=new ArrayList<Reservation>();
-    
+    private String renter;
+    private List<Quote> quotes = new LinkedList<Quote>();
 
-    public ReservationSession() {
-         this.name="";
-    }
-    
-    
-    public ReservationSession(String name){
-        this.name=name;
-    }
-    
     @Override
     public Set<String> getAllRentalCompanies() {
         return new HashSet<String>(RentalStore.getRentals().keySet());
     }
-
+    
     @Override
-    public Set<CarType> getAvailableCarTypes(Date start, Date end) {
-        Set<CarType> ctList=new HashSet<CarType>();
-        
-        for (Iterator<Map.Entry<String, CarRentalCompany>> entries = RentalStore.getRentals().entrySet().iterator(); entries.hasNext(); ) {
-            Map.Entry<String, CarRentalCompany> compMap= entries.next();
-            ctList.addAll(compMap.getValue().getAvailableCarTypes(start, end));
-        }
-        return ctList;
-    }
-    @Override
-    public void createQuote(String name, Date start, Date end, String carType, String region)throws ReservationException{
-        ReservationConstraints constr=new ReservationConstraints(start,end, carType,region);
-        
-        Quote quote=null;
-        for (Iterator<Map.Entry<String, CarRentalCompany>> entries = RentalStore.getRentals().entrySet().iterator(); entries.hasNext(); ) {
-            Map.Entry<String, CarRentalCompany> compMap= entries.next();
-            try {
-                quote=compMap.getValue().createQuote(constr, this.name);
-            } catch (ReservationException ex) {
-                
+    public List<CarType2> getAvailableCarTypes(Date start, Date end) {
+        List<CarType2> availableCarTypes = new LinkedList<CarType2>();
+        for(String crc : getAllRentalCompanies()) {
+            for(CarType2 ct : RentalStore.getRentals().get(crc).getAvailableCarTypes(start, end)) {
+                if(!availableCarTypes.contains(ct))
+                    availableCarTypes.add(ct);
             }
         }
-        if (quote==null){
-            throw new ReservationException("No company can provide quote");
+        return availableCarTypes;
+    }
+
+    @Override
+    public Quote createQuote(String company, ReservationConstraints constraints) throws ReservationException {
+        try {
+            Quote out = RentalStore.getRental(company).createQuote(constraints, renter);
+            quotes.add(out);
+            return out;
+        } catch(Exception e) {
+            throw new ReservationException(e);
         }
-        quoteList.add(quote);
     }
 
     @Override
     public List<Quote> getCurrentQuotes() {
-        return quoteList;
+        return quotes;
     }
 
     @Override
-    public List<Reservation> confirmQuotes() throws ReservationException {
-        List<Reservation> reservationList=new ArrayList<Reservation>();
-		
-        int j=quoteList.size();
-        boolean succes=true;
-        for (int quote=0;quote<quoteList.size();quote++) {
-
-            String compName=quoteList.get(quote).getRentalCompany();
-            for (Iterator<Map.Entry<String, CarRentalCompany>> entries = RentalStore.getRentals().entrySet().iterator(); entries.hasNext(); ) {
-                Map.Entry<String, CarRentalCompany> compMap= entries.next();
-                CarRentalCompany compa= compMap.getValue();
-                if (compa.getName().equals(compName)){
-                    try {
-                        reservationList.add(compa.confirmQuote(quoteList.get(quote)));
-                    }
-                    catch (ReservationException e){
-                            succes=false;
-                    }
-                    break;
-                }
+    public List<Reservation2> confirmQuotes() throws ReservationException {
+        List<Reservation2> done = new LinkedList<Reservation2>();
+        try {
+            for (Quote quote : quotes) {
+                done.add(RentalStore.getRental(quote.getRentalCompany()).confirmQuote(quote));
             }
+        } catch (Exception e) {
+            for(Reservation2 r:done)
+                RentalStore.getRental(r.getRentalCompany()).cancelReservation(r);
+            throw new ReservationException(e);
         }
-        if (succes==false) {
-            System.out.println("Reservation canceled: ");
-            System.out.println("Reservation canceled: "+this.name);
-            
-            System.out.println(reservationList.toString());
-            CarRentalCompany compa=null;
-            for (int i=0;i<reservationList.size();i++) {
-                String compaName=reservationList.get(i).getRentalCompany();
-                for (Iterator<Map.Entry<String, CarRentalCompany>> entries = RentalStore.getRentals().entrySet().iterator(); entries.hasNext(); ) {
-                    Map.Entry<String, CarRentalCompany> compMap= entries.next();
-                    compa=compMap.getValue();
-                    if (compa.getName().equals(compaName)) {
-                        compa.cancelReservation(reservationList.get(i));
-                        break;
-                    }
-                }
-            }
-            reservationList.clear();
-            throw new ReservationException("Can't complete all reservations");
-        }
-        
-        
-        resList.addAll(reservationList);
-        return reservationList;
+        return done;
     }
 
     @Override
-    public void setName(String name) {
-        this.name=name;
+    public void setRenterName(String name) {
+        if (renter != null) {
+            throw new IllegalStateException("name already set");
+        }
+        renter = name;
     }
-    
+
     @Override
-    public String getName() {
-        return this.name;
+    public String getRenterName() {
+        return renter;
     }
 }
